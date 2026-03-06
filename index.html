@@ -19,7 +19,7 @@
             font-family: 'Noto Sans KR', sans-serif; 
             letter-spacing: -0.015em;
             background-color: var(--bg-main);
-            word-break: keep-all; /* 단어 단위 줄바꿈 유지로 가독성 확보 */
+            word-break: keep-all;
         }
 
         /* 스크롤바 디자인 */
@@ -86,7 +86,7 @@
                         </div>
                     </div>
 
-                    <!-- 확률 아이템 리스트 (가독성 최적화) -->
+                    <!-- 확률 아이템 리스트 -->
                     <div id="itemContainer" class="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar"></div>
                     
                     <div class="mt-6 grid grid-cols-2 gap-3">
@@ -194,7 +194,7 @@
                         <button onclick="applyEnhanceBulk()" class="w-full mt-2 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-all">일괄 적용하기</button>
                     </div>
 
-                    <!-- 강화 단계 리스트 (가독성 및 모바일 레이아웃 최적화) -->
+                    <!-- 강화 단계 리스트 -->
                     <div id="enhanceLevelContainer" class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"></div>
                     
                     <button onclick="addEnhanceLevel()" class="w-full mt-6 py-4 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl text-slate-600 font-bold hover:bg-white hover:border-indigo-400 hover:text-indigo-600 transition-all text-sm">+ 새로운 단계 추가</button>
@@ -346,28 +346,23 @@
             items.forEach((item, index) => {
                 const realProb = mode === 'percent' ? item.value : (item.value / total * 100);
                 const div = document.createElement('div');
-                // 레이아웃 깨짐 방지를 위해 flex-col과 gap 사용으로 안정성 확보
-                div.className = "group flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-white border border-slate-200 rounded-2xl hover:border-blue-300 hover:shadow-sm transition-all";
+                // 레이아웃을 2단 구조(수직)로 안전하게 배치
+                div.className = "group flex items-center gap-3 p-3.5 bg-white border border-slate-200 rounded-[1.25rem] hover:border-blue-400 hover:shadow-md transition-all";
                 div.innerHTML = `
-                    <div class="flex items-center gap-3 w-full">
-                        <!-- OS 네이티브 컬러 피커 적용 (오류 제로, 잘림 제로) -->
-                        <label class="relative shrink-0 w-6 h-6 rounded-full cursor-pointer shadow-inner border border-slate-200 overflow-hidden block" title="색상 변경">
-                            <div class="w-full h-full pointer-events-none" style="background-color:${item.color}"></div>
-                            <input type="color" value="${item.color}" onchange="updateItem(${index},'color',this.value)" class="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer">
-                        </label>
-                        
-                        <div class="flex-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 min-w-0 w-full">
-                            <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="w-full sm:flex-1 bg-transparent font-bold text-sm text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-blue-500 outline-none transition-colors px-1 py-0.5 truncate">
-                            <div class="flex items-center gap-2 shrink-0">
-                                <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-20 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right">
-                                <span class="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1 rounded-md min-w-[50px] text-center">${realProb.toFixed(2)}%</span>
-                            </div>
+                    <label class="shrink-0 relative w-10 h-10 rounded-full cursor-pointer shadow-inner border border-slate-200 overflow-hidden block" title="색상 변경">
+                        <div class="w-full h-full pointer-events-none" style="background-color:${item.color}"></div>
+                        <input type="color" value="${item.color}" onchange="updateItem(${index},'color',this.value)" class="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer">
+                    </label>
+                    <div class="flex-1 flex flex-col gap-1.5 min-w-0">
+                        <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="w-full bg-transparent font-bold text-sm text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-blue-500 outline-none transition-colors px-1 py-0.5 truncate" placeholder="아이템명">
+                        <div class="flex items-center gap-2">
+                            <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-full min-w-[60px] px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right" placeholder="확률/가중치">
+                            <span class="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-md text-center shrink-0 w-16 whitespace-nowrap">${realProb.toFixed(2)}%</span>
                         </div>
-                        
-                        <button onclick="removeItem(${index})" class="shrink-0 p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors ml-1">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                        </button>
-                    </div>`;
+                    </div>
+                    <button onclick="removeItem(${index})" class="shrink-0 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>`;
                 container.appendChild(div);
                 
                 const opt = document.createElement('option'); 
@@ -443,7 +438,7 @@
             if(!tEl || !pEl || !cEl) return;
             
             const idx = parseInt(tEl.value);
-            const uCount = 1000; // 고정된 1천명 표본 (충분히 안정적)
+            const uCount = 1000; // 고정된 1천명 표본
             const pCount = parseInt(pEl.value) || 0;
             const cost = parseInt(cEl.value);
             const cdf = getCDF();
@@ -525,30 +520,37 @@
             targetSelect.innerHTML = '';
             enhanceLevels.forEach((level, i) => {
                 const div = document.createElement('div');
-                div.className = "p-4 bg-white border border-slate-200 rounded-2xl flex items-start gap-4 hover:border-indigo-300 hover:shadow-sm transition-all";
+                // 확실한 수직구조(flex-col) 2단 배치로 가독성 보장
+                div.className = "relative p-5 bg-white border border-slate-200 rounded-[1.5rem] hover:border-indigo-400 hover:shadow-md transition-all";
                 div.innerHTML = `
-                    <div class="w-12 h-12 bg-indigo-50 text-indigo-700 rounded-xl flex items-center justify-center font-black text-lg shrink-0 border border-indigo-100 mt-1">+${level.lv}</div>
-                    <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3 w-full">
+                    <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center font-black text-sm border border-indigo-200 shrink-0">+${level.lv}</div>
+                            <span class="font-bold text-sm text-slate-800">강화 단계</span>
+                        </div>
+                        <button onclick="removeEnhanceLevel(${i})" class="text-slate-300 hover:text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
                         <div class="flex flex-col gap-1.5">
-                            <span class="text-xs font-bold text-slate-500">성공률(%)</span>
-                            <input type="number" step="0.1" value="${level.prob}" onchange="updateLevelProp(${i}, 'prob', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white">
+                            <span class="text-[11px] font-bold text-slate-500">성공률(%)</span>
+                            <input type="number" step="0.1" value="${level.prob}" onchange="updateLevelProp(${i}, 'prob', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-colors">
                         </div>
                         <div class="flex flex-col gap-1.5">
-                            <span class="text-xs font-bold text-slate-500">시도 비용</span>
-                            <input type="number" value="${level.cost}" onchange="updateLevelProp(${i}, 'cost', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white">
+                            <span class="text-[11px] font-bold text-slate-500">시도 비용</span>
+                            <input type="number" value="${level.cost}" onchange="updateLevelProp(${i}, 'cost', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white transition-colors">
                         </div>
-                        <div class="flex flex-col gap-1.5">
-                            <span class="text-xs font-bold text-slate-500">실패 패널티</span>
-                            <select onchange="updateLevelProp(${i}, 'penalty', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white cursor-pointer">
-                                <option value="0" ${level.penalty == 0 ? 'selected' : ''}>유지</option>
-                                <option value="1" ${level.penalty == 1 ? 'selected' : ''}>하락</option>
-                                <option value="2" ${level.penalty == 2 ? 'selected' : ''}>파괴</option>
+                        <div class="flex flex-col gap-1.5 col-span-2 mt-1">
+                            <span class="text-[11px] font-bold text-slate-500">실패 패널티</span>
+                            <select onchange="updateLevelProp(${i}, 'penalty', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-500 focus:bg-white cursor-pointer transition-colors">
+                                <option value="0" ${level.penalty == 0 ? 'selected' : ''}>유지 (변화 없음)</option>
+                                <option value="1" ${level.penalty == 1 ? 'selected' : ''}>하락 (1단계 감소)</option>
+                                <option value="2" ${level.penalty == 2 ? 'selected' : ''}>파괴 (0단계 초기화)</option>
                             </select>
                         </div>
                     </div>
-                    <button onclick="removeEnhanceLevel(${i})" class="shrink-0 p-2 mt-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>`;
+                `;
                 container.appendChild(div);
                 const opt = document.createElement('option'); opt.value = level.lv; opt.textContent = `+${level.lv} 단계 도달`;
                 targetSelect.appendChild(opt);
