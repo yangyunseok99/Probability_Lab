@@ -98,20 +98,16 @@
                         <button onclick="addItem()" class="py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all font-bold text-sm flex items-center justify-center gap-1">
                             <span class="text-lg leading-none">+</span> 추가
                         </button>
-                        <button onclick="toggleBulkInput()" class="py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 hover:bg-white hover:border-blue-400 transition-all font-bold text-sm">
-                            📝 엑셀 복사
+                        <button onclick="toggleBulkInput(true)" class="py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 hover:bg-white hover:border-blue-400 hover:text-blue-600 transition-all font-bold text-sm flex items-center justify-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            엑셀 편집
                         </button>
-                    </div>
-
-                    <div id="bulkInputWrapper" class="hidden mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-200">
-                        <textarea id="bulkInputArea" placeholder="아이템명	수치(확률/가중치)" class="w-full h-28 p-3 text-sm bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all"></textarea>
-                        <button onclick="applyBulkInput(true)" class="w-full mt-2 py-3 bg-blue-600 text-white rounded-lg text-sm font-bold shadow-md hover:bg-blue-700 transition-all">목록 일괄 덮어쓰기</button>
                     </div>
 
                     <div class="mt-8 pt-6 border-t border-slate-100">
                         <label class="block text-xs font-bold text-slate-500 mb-2">회당 시도 비용 (재화)</label>
                         <div class="relative">
-                            <input type="number" id="costPerRollInput" value="300" class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400">
+                            <input type="number" id="costPerRollInput" value="300" class="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-base text-slate-800 outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-shadow">
                             <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-slate-400">💎</span>
                         </div>
                     </div>
@@ -131,16 +127,16 @@
                         <div class="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex flex-col justify-between">
                             <h3 class="font-bold text-blue-900 text-base mb-4">확률 정밀 검증 (대량 시행)</h3>
                             <div class="flex gap-2">
-                                <input type="number" id="bulkRollCount" value="10000" class="w-full px-3 py-2.5 rounded-xl border border-blue-200 font-bold outline-none text-sm focus:ring-2 focus:ring-blue-400 focus:bg-white">
+                                <input type="number" id="bulkRollCount" value="10000" class="w-full px-3 py-2.5 rounded-xl border border-blue-200 font-bold outline-none text-sm focus:ring-2 focus:ring-blue-400 focus:bg-white transition-shadow">
                                 <button onclick="runBulkSimulation()" class="px-6 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-md hover:bg-blue-700 transition-all shrink-0">추출</button>
                             </div>
                         </div>
                         <div class="p-5 bg-purple-50/50 rounded-2xl border border-purple-100">
                             <h3 class="font-bold text-purple-900 text-base mb-4">획득 체감 분석 (천장 설계)</h3>
                             <div class="space-y-3">
-                                <select id="targetItemIndex" class="w-full px-3 py-2.5 rounded-xl border border-purple-200 font-bold text-sm bg-white outline-none focus:ring-2 focus:ring-purple-400"></select>
+                                <select id="targetItemIndex" class="w-full px-3 py-2.5 rounded-xl border border-purple-200 font-bold text-sm bg-white outline-none focus:ring-2 focus:ring-purple-400 transition-shadow cursor-pointer"></select>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <input type="number" id="pityCount" placeholder="천장 (0=무제한)" class="w-full px-3 py-2.5 rounded-xl border border-purple-200 font-bold text-sm outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white">
+                                    <input type="number" id="pityCount" placeholder="천장 (0=무제한)" class="w-full px-3 py-2.5 rounded-xl border border-purple-200 font-bold text-sm outline-none focus:ring-2 focus:ring-purple-400 focus:bg-white transition-shadow">
                                     <button onclick="runTargetSimulation()" class="w-full py-2.5 bg-purple-600 text-white rounded-xl font-bold text-sm shadow-md hover:bg-purple-700 transition-all">분석 시작</button>
                                 </div>
                             </div>
@@ -189,14 +185,11 @@
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-xl font-bold text-slate-800">강화 조건 설정</h2>
                         <div class="flex gap-2 shrink-0">
-                             <button onclick="toggleEnhanceBulk()" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all">엑셀 편집</button>
+                             <button onclick="toggleEnhanceBulk(true)" class="text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-all flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg> 엑셀 편집
+                             </button>
                              <button onclick="resetEnhanceLevels()" class="text-xs font-bold text-red-500 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-all">초기화</button>
                         </div>
-                    </div>
-                    
-                    <div id="enhanceBulkWrapper" class="hidden mb-6 p-4 bg-indigo-50/50 rounded-2xl border border-indigo-100">
-                        <textarea id="enhanceBulkArea" placeholder="단계	확률	비용	페널티(0:유지, 1:하락, 2:파괴)" class="w-full h-28 p-3 text-sm bg-white border border-indigo-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-400"></textarea>
-                        <button onclick="applyEnhanceBulk()" class="w-full mt-2 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:bg-indigo-700 transition-all">일괄 적용하기</button>
                     </div>
 
                     <!-- 강화 단계 리스트 -->
@@ -253,7 +246,54 @@
         </div>
     </div>
 
-    <!-- Help Modal (대폭 보강된 가이드) -->
+    <!-- Gacha Bulk Input Modal (가챠 엑셀 편집 모달) -->
+    <div id="gachaBulkModal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleBulkInput(false)"></div>
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl relative z-10 flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    가챠 데이터 엑셀 붙여넣기
+                </h2>
+                <button onclick="toggleBulkInput(false)" class="text-slate-400 hover:text-slate-800 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-600">엑셀이나 구글 스프레드시트에서 <strong>[아이템명]</strong>과 <strong>[수치(가중치/확률)]</strong> 두 열을 드래그하여 복사한 후 아래 빈칸에 붙여넣으세요.</p>
+                <textarea id="bulkInputArea" class="w-full h-56 p-4 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-shadow whitespace-pre text-slate-700" placeholder="예시 형식:&#10;전설의 검&#9;1&#10;영웅의 방패&#9;5&#10;일반 포션&#9;100"></textarea>
+            </div>
+            <div class="p-6 bg-slate-50 border-t border-slate-100 flex gap-3 rounded-b-3xl">
+                <button onclick="applyBulkInput(false)" class="flex-1 py-3.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold hover:bg-slate-100 hover:text-slate-900 transition-all shadow-sm">기존 목록에 추가</button>
+                <button onclick="applyBulkInput(true)" class="flex-1 py-3.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-md transition-all">기존 목록 덮어쓰기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhance Bulk Input Modal (강화 엑셀 편집 모달) -->
+    <div id="enhanceBulkModal" class="hidden fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleEnhanceBulk(false)"></div>
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl relative z-10 flex flex-col animate-fade-in">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    강화 데이터 엑셀 붙여넣기
+                </h2>
+                <button onclick="toggleEnhanceBulk(false)" class="text-slate-400 hover:text-slate-800 transition-colors p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p class="text-sm text-slate-600">엑셀에서 <strong>[단계], [성공률(%)], [시도비용], [페널티]</strong> 4개의 열을 복사하여 붙여넣으세요.<br><span class="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded inline-block mt-2">* 페널티 코드 : 0 = 유지 / 1 = 하락 / 2 = 파괴</span></p>
+                <textarea id="enhanceBulkArea" class="w-full h-56 p-4 text-sm bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-400 focus:bg-white transition-shadow whitespace-pre text-slate-700" placeholder="예시 (1단계부터 순서대로):&#10;1&#9;100&#9;1000&#9;0&#10;2&#9;90&#9;1500&#9;0&#10;3&#9;80&#9;2000&#9;1"></textarea>
+            </div>
+            <div class="p-6 bg-slate-50 border-t border-slate-100 rounded-b-3xl">
+                <button onclick="applyEnhanceBulk()" class="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 shadow-md transition-all">수치 일괄 적용하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal (가이드) -->
     <div id="helpModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
         <div class="modal-overlay absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleHelp(false)"></div>
         <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl relative z-10 flex flex-col max-h-[90vh] animate-fade-in">
@@ -337,12 +377,12 @@
                 <!-- Tip Section -->
                 <section class="bg-yellow-50 p-5 rounded-2xl border border-yellow-200">
                     <h4 class="font-bold text-yellow-800 mb-2">💡 프로 기획자 꿀팁: 엑셀 연동</h4>
-                    <p class="text-sm text-yellow-900">수십 개의 아이템/강화 단계를 손으로 입력하지 마세요. <strong>엑셀이나 구글 스프레드시트</strong>에서 작성한 표(아이템명, 확률 등)를 그대로 드래그하여 복사(Ctrl+C)한 뒤, 시뮬레이터의 '엑셀 편집' 버튼을 눌러 붙여넣기(Ctrl+V) 하시면 한 번에 적용됩니다!</p>
+                    <p class="text-sm text-yellow-900">수십 개의 아이템/강화 단계를 손으로 입력하지 마세요. <strong>엑셀이나 구글 스프레드시트</strong>에서 작성한 표를 그대로 드래그하여 복사(Ctrl+C)한 뒤, 시뮬레이터의 <strong>'엑셀 편집'</strong> 버튼을 눌러 붙여넣기(Ctrl+V) 하시면 한 번에 적용됩니다!</p>
                 </section>
 
             </div>
             
-            <div class="p-6 sm:p-8 bg-slate-50 border-t border-slate-100 shrink-0">
+            <div class="p-6 sm:p-8 bg-slate-50 border-t border-slate-100 shrink-0 rounded-b-3xl">
                 <button onclick="toggleHelp(false)" class="w-full py-4 bg-slate-800 text-white rounded-xl font-bold text-base sm:text-lg hover:bg-slate-900 shadow-md transition-all">설명서를 닫고 연구 시작하기</button>
             </div>
         </div>
@@ -400,6 +440,23 @@
             }, 2500);
         }
 
+        // --- Bulk Input Modals Logic ---
+        function toggleBulkInput(show = true) { 
+            const modal = document.getElementById('gachaBulkModal');
+            if(modal) {
+                modal.classList.toggle('hidden', !show);
+                if(show) document.getElementById('bulkInputArea').value = ''; // 모달 열때 초기화
+            }
+        }
+
+        function toggleEnhanceBulk(show = true) { 
+            const modal = document.getElementById('enhanceBulkModal');
+            if(modal) {
+                modal.classList.toggle('hidden', !show);
+                if(show) document.getElementById('enhanceBulkArea').value = ''; // 모달 열때 초기화
+            }
+        }
+
         // --- Gacha Module ---
         function renderItems() {
             const container = document.getElementById('itemContainer');
@@ -432,22 +489,24 @@
                 }
 
                 const div = document.createElement('div');
-                div.className = "group relative flex items-center gap-3 p-3.5 bg-white border border-slate-200 rounded-[1.25rem] hover:border-blue-400 hover:shadow-md transition-all";
+                div.className = "group flex flex-wrap sm:flex-nowrap items-center gap-3 p-4 bg-white border border-slate-200 rounded-2xl hover:border-blue-300 hover:shadow-sm transition-all";
                 div.innerHTML = `
-                    <label class="shrink-0 relative w-10 h-10 rounded-full cursor-pointer shadow-inner border border-slate-200 overflow-hidden block" title="색상 변경">
-                        <div class="w-full h-full pointer-events-none" style="background-color:${item.color}"></div>
-                        <input type="color" value="${item.color}" onchange="updateItem(${index},'color',this.value)" class="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer">
-                    </label>
-                    <div class="flex-1 flex flex-col gap-1.5 min-w-0">
-                        <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="w-full bg-transparent font-bold text-sm text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-blue-500 outline-none transition-colors px-1 py-0.5 truncate" placeholder="아이템명">
-                        <div class="flex items-center gap-2">
-                            <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-full min-w-[60px] px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right" title="${mode === 'weight' ? '가중치 값' : '백분율(%) 값'}">
-                            <span class="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-md text-center shrink-0 w-16 whitespace-nowrap" title="실제 확률">${realProb.toFixed(2)}%</span>
-                        </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        <label class="relative w-6 h-6 rounded-full cursor-pointer shadow-inner border border-slate-200 overflow-hidden block" title="색상 변경">
+                            <div class="w-full h-full pointer-events-none" style="background-color:${item.color}"></div>
+                            <input type="color" value="${item.color}" onchange="updateItem(${index},'color',this.value)" class="absolute opacity-0 w-full h-full top-0 left-0 cursor-pointer">
+                        </label>
                     </div>
-                    <button onclick="removeItem(${index})" class="shrink-0 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="항목 삭제">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
-                    </button>`;
+                    
+                    <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="flex-1 min-w-[120px] w-full sm:w-auto bg-transparent font-bold text-sm text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-blue-500 outline-none transition-colors px-1 py-1.5" placeholder="아이템명">
+                    
+                    <div class="flex items-center justify-end gap-2 w-full sm:w-auto shrink-0 ml-auto mt-2 sm:mt-0">
+                        <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-20 px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right" title="${mode === 'weight' ? '가중치 값' : '백분율(%) 값'}">
+                        <span class="text-xs text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-md min-w-[55px] text-center" title="실제 출현 확률">${realProb.toFixed(2)}%</span>
+                        <button onclick="removeItem(${index})" class="p-1.5 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors sm:ml-1" title="항목 삭제">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>`;
                 container.appendChild(div);
                 
                 const opt = document.createElement('option'); 
@@ -479,18 +538,29 @@
         function updateItem(idx, k, v) { items[idx][k] = k === 'value' ? parseFloat(v) : v; renderItems(); }
         function addItem() { items.push({ name: "신규 항목", value: mode === 'percent' ? 0 : 10, color: '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0') }); renderItems(); }
         function removeItem(idx) { if(items.length > 1) { items.splice(idx,1); renderItems(); } }
-        function toggleBulkInput() { const el = document.getElementById('bulkInputWrapper'); if (el) el.classList.toggle('hidden'); }
         
         function applyBulkInput(overwrite) { 
             const area = document.getElementById('bulkInputArea');
-            if (!area || !area.value.trim()) return;
+            if (!area || !area.value.trim()) {
+                showToast("데이터를 입력해주세요.", "⚠️");
+                return;
+            }
             const lines = area.value.trim().split('\n');
             let n = []; 
             lines.forEach(l => { 
+                if(!l.trim()) return; // 빈 줄 무시
                 const p = l.split(/\t|,/); 
                 if(p.length >= 2) n.push({name:p[0].trim(), value:parseFloat(p[1]), color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}); 
             });
-            if(n.length){ items = overwrite ? n : items.concat(n); renderItems(); toggleBulkInput(); showToast("데이터가 반영되었습니다."); }
+            
+            if(n.length){ 
+                items = overwrite ? n : items.concat(n); 
+                renderItems(); 
+                toggleBulkInput(false); 
+                showToast(`총 ${n.length}개의 데이터가 반영되었습니다.`); 
+            } else {
+                showToast("올바른 양식이 아닙니다.", "❌");
+            }
         }
 
         function getCDF() { 
@@ -664,17 +734,28 @@
         }
 
         function updateLevelProp(idx, k, v) { enhanceLevels[idx][k] = (k === 'penalty' ? parseInt(v) : parseFloat(v)); }
-        function toggleEnhanceBulk() { const el = document.getElementById('enhanceBulkWrapper'); if (el) el.classList.toggle('hidden'); }
+        
         function applyEnhanceBulk() {
             const area = document.getElementById('enhanceBulkArea');
-            if (!area || !area.value.trim()) return;
+            if (!area || !area.value.trim()) {
+                showToast("데이터를 입력해주세요.", "⚠️");
+                return;
+            }
             const lines = area.value.trim().split('\n');
             let n = [];
             lines.forEach((l, idx) => {
+                if(!l.trim()) return; // 빈 줄 무시
                 const p = l.split(/\t|,/);
                 if(p.length >= 2) n.push({ lv: idx + 1, prob: parseFloat(p[1]), cost: parseFloat(p[2] || 0), penalty: parseInt(p[3] || 0) });
             });
-            if(n.length) { enhanceLevels = n; renderEnhanceLevels(); toggleEnhanceBulk(); showToast("강화 수치 반영 완료"); }
+            if(n.length) { 
+                enhanceLevels = n; 
+                renderEnhanceLevels(); 
+                toggleEnhanceBulk(false); 
+                showToast("강화 수치 반영 완료"); 
+            } else {
+                showToast("올바른 양식이 아닙니다.", "❌");
+            }
         }
 
         function runEnhanceSimulation() {
