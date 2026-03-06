@@ -86,6 +86,11 @@
                         </div>
                     </div>
 
+                    <!-- 확률 총합 경고창 (백분율 모드 전용) -->
+                    <div id="probWarning" class="hidden mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100">
+                        ⚠️ 확률 합계가 100%가 아닙니다.
+                    </div>
+
                     <!-- 확률 아이템 리스트 -->
                     <div id="itemContainer" class="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar"></div>
                     
@@ -341,13 +346,32 @@
             if(!container || !targetSelect) return;
             container.innerHTML = '';
             targetSelect.innerHTML = '';
+            
+            // 가중치 합 또는 백분율 합 계산
             let total = items.reduce((sum, item) => sum + parseFloat(item.value || 0), 0);
             
+            // 백분율 모드일 때 100% 경고창 표시
+            const warningEl = document.getElementById('probWarning');
+            if (warningEl) {
+                if (mode === 'percent' && Math.abs(total - 100) > 0.001) {
+                    warningEl.classList.remove('hidden');
+                    warningEl.textContent = `⚠️ 현재 합계: ${total.toFixed(2)}% (100%를 맞춰주세요)`;
+                } else {
+                    warningEl.classList.add('hidden');
+                }
+            }
+
             items.forEach((item, index) => {
-                const realProb = mode === 'percent' ? item.value : (item.value / total * 100);
+                // 모드에 따라 실제 확률 계산 (가중치면 비율, 백분율이면 입력값 그대로)
+                let realProb = 0;
+                if (mode === 'percent') {
+                    realProb = parseFloat(item.value || 0);
+                } else {
+                    realProb = total > 0 ? (item.value / total * 100) : 0;
+                }
+
                 const div = document.createElement('div');
-                // 레이아웃을 2단 구조(수직)로 안전하게 배치
-                div.className = "group flex items-center gap-3 p-3.5 bg-white border border-slate-200 rounded-[1.25rem] hover:border-blue-400 hover:shadow-md transition-all";
+                div.className = "group relative flex items-center gap-3 p-3.5 bg-white border border-slate-200 rounded-[1.25rem] hover:border-blue-400 hover:shadow-md transition-all";
                 div.innerHTML = `
                     <label class="shrink-0 relative w-10 h-10 rounded-full cursor-pointer shadow-inner border border-slate-200 overflow-hidden block" title="색상 변경">
                         <div class="w-full h-full pointer-events-none" style="background-color:${item.color}"></div>
@@ -356,11 +380,11 @@
                     <div class="flex-1 flex flex-col gap-1.5 min-w-0">
                         <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="w-full bg-transparent font-bold text-sm text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-blue-500 outline-none transition-colors px-1 py-0.5 truncate" placeholder="아이템명">
                         <div class="flex items-center gap-2">
-                            <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-full min-w-[60px] px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right" placeholder="확률/가중치">
-                            <span class="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-md text-center shrink-0 w-16 whitespace-nowrap">${realProb.toFixed(2)}%</span>
+                            <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-full min-w-[60px] px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-blue-500 focus:bg-white transition-colors text-right" title="${mode === 'weight' ? '가중치 값' : '백분율(%) 값'}">
+                            <span class="text-[11px] text-blue-600 font-bold bg-blue-50 px-2 py-1.5 rounded-md text-center shrink-0 w-16 whitespace-nowrap" title="실제 확률">${realProb.toFixed(2)}%</span>
                         </div>
                     </div>
-                    <button onclick="removeItem(${index})" class="shrink-0 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                    <button onclick="removeItem(${index})" class="shrink-0 p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors" title="항목 삭제">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>`;
                 container.appendChild(div);
@@ -377,9 +401,20 @@
             mode = m;
             const mw = document.getElementById('modeWeight');
             const mp = document.getElementById('modePercent');
-            if (mw) mw.className = mode === 'weight' ? "px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 font-bold text-sm" : "px-3 py-1.5 rounded-lg text-slate-500 font-bold text-sm";
-            if (mp) mp.className = mode === 'percent' ? "px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 font-bold text-sm" : "px-3 py-1.5 rounded-lg text-slate-500 font-bold text-sm";
+            
+            if (mw && mp) {
+                if (mode === 'weight') {
+                    mw.className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 font-bold text-sm transition-all";
+                    mp.className = "px-3 py-1.5 rounded-lg text-slate-500 font-bold text-sm transition-all";
+                } else {
+                    mp.className = "px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 font-bold text-sm transition-all";
+                    mw.className = "px-3 py-1.5 rounded-lg text-slate-500 font-bold text-sm transition-all";
+                }
+            }
+            
+            // 모드가 변경되면 툴팁이나 경고창 등을 업데이트하기 위해 재렌더링
             renderItems();
+            showToast(`${mode === 'weight' ? '가중치' : '백분율'} 모드로 변경되었습니다.`);
         }
 
         function updateItem(idx, k, v) { items[idx][k] = k === 'value' ? parseFloat(v) : v; renderItems(); }
@@ -402,7 +437,8 @@
         function getCDF() { 
             let total = items.reduce((s,i) => s + parseFloat(i.value||0), 0);
             let c = 0; return items.map(i => {
-                let p = mode === 'percent' ? (i.value/100) : (i.value/total);
+                // 모드에 따라 확률 계산 로직 분리
+                let p = mode === 'percent' ? (parseFloat(i.value||0)/100) : (total > 0 ? parseFloat(i.value||0)/total : 0);
                 c += p; return {...i, cdf: c, prob: p};
             }); 
         }
@@ -486,7 +522,11 @@
             if(!canvas) return;
             const ctx = canvas.getContext('2d');
             if(pieChart) pieChart.destroy();
-            pieChart = new Chart(ctx, { type:'doughnut', data:{labels:items.map(i=>i.name), datasets:[{data:items.map(i=>mode==='percent'?i.value:(i.value/total*100)), backgroundColor:items.map(i=>i.color), borderWidth:3, borderColor:'#ffffff', hoverOffset: 8}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},cutout:'75%'} });
+            
+            // 차트 데이터도 모드에 따라 다르게 주입
+            const chartData = items.map(i => mode === 'percent' ? parseFloat(i.value||0) : (total > 0 ? parseFloat(i.value||0)/total*100 : 0));
+            
+            pieChart = new Chart(ctx, { type:'doughnut', data:{labels:items.map(i=>i.name), datasets:[{data:chartData, backgroundColor:items.map(i=>i.color), borderWidth:3, borderColor:'#ffffff', hoverOffset: 8}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},cutout:'75%'} });
         }
 
         function drawGachaDistChart(counts) {
