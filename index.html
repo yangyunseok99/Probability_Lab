@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probability Lab | 확률 설계 연구소</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Noto Sans KR 폰트 임포트 */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap');
+        
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --bg-main: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            letter-spacing: -0.01em;
+            background-color: var(--bg-main);
+        }
+
+        /* 스크롤바 디자인 */
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        /* 탭 활성화 스타일 */
+        .tab-active { 
+            color: var(--primary); 
+            background: white; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            font-weight: 700;
+        }
+
+        /* 입력창 포커스 스타일 */
+        .input-focus:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+
+        .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 폰트 두께 보정 */
+        h1, h2, h3 { font-weight: 700; }
+        .font-black { font-weight: 900; }
+    </style>
+</head>
+<body class="text-slate-900 min-h-screen selection:bg-blue-100">
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <!-- Header -->
+        <header class="mb-10 flex flex-col lg:flex-row justify-between items-center gap-6 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200/60">
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-none">Probability <span class="text-blue-600">Lab</span></h1>
+                    <p class="text-slate-400 text-sm mt-1 font-medium">확률 설계 및 시뮬레이션 연구소</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full lg:w-auto">
+                <button onclick="switchTab('gacha')" id="tabBtnGacha" class="flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 tab-active text-sm">가챠</button>
+                <button onclick="switchTab('enhance')" id="tabBtnEnhance" class="flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 text-slate-500 hover:text-slate-900 text-sm font-bold">강화</button>
+            </div>
+
+            <button onclick="toggleHelp(true)" class="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl hover:bg-slate-800 transition-all font-bold text-sm shadow-lg shadow-slate-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                가이드
+            </button>
+        </header>
+
+        <!-- [GACHA TAB] -->
+        <div id="tabGacha" class="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+            <!-- Sidebar -->
+            <aside class="lg:col-span-4 space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60 sticky top-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-xl font-bold text-slate-800">확률 테이블</h2>
+                        <div class="inline-flex p-1 bg-slate-50 rounded-xl border border-slate-100">
+                            <button id="modeWeight" onclick="setMode('weight')" class="px-3 py-1.5 rounded-lg bg-white shadow-sm text-blue-600 font-bold text-xs">가중치</button>
+                            <button id="modePercent" onclick="setMode('percent')" class="px-3 py-1.5 rounded-lg text-slate-400 font-bold text-xs">백분율</button>
+                        </div>
+                    </div>
+
+                    <div id="itemContainer" class="space-y-4 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                    
+                    <div class="mt-8 grid grid-cols-2 gap-3">
+                        <button onclick="addItem()" class="py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 hover:bg-white hover:border-blue-300 transition-all font-bold text-sm">
+                            + 항목 추가
+                        </button>
+                        <button onclick="toggleBulkInput()" class="py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-600 hover:bg-white transition-all font-bold text-sm">
+                            📝 엑셀 복사
+                        </button>
+                    </div>
+
+                    <div id="bulkInputWrapper" class="hidden mt-4 p-5 bg-slate-50 rounded-[1.5rem] border border-slate-200 shadow-inner">
+                        <textarea id="bulkInputArea" placeholder="아이템명	확률" class="w-full h-32 p-4 text-sm bg-white border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100"></textarea>
+                        <button onclick="applyBulkInput(true)" class="w-full mt-3 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-md">일괄 적용</button>
+                    </div>
+
+                    <div class="mt-8 pt-8 border-t border-slate-100 font-sans">
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest">회당 시도 비용</label>
+                        <div class="relative font-sans">
+                            <input type="number" id="costPerRollInput" value="300" class="w-full pl-5 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl font-black text-slate-700 input-focus">
+                            <span class="absolute right-5 top-1/2 -translate-y-1/2 font-bold text-slate-400">💎</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-8 pt-8 border-t border-slate-100 flex justify-center">
+                        <div class="w-full max-w-[240px]"><canvas id="pieChart"></canvas></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="lg:col-span-8 space-y-8">
+                <section class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                    <h2 class="text-xl font-bold mb-8 text-slate-800">시뮬레이션 엔진</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-6 bg-blue-50/40 rounded-3xl border border-blue-100 flex flex-col justify-between">
+                            <h3 class="font-bold text-blue-900 mb-4 flex items-center gap-2">확률 정밀 검증</h3>
+                            <div class="flex gap-3">
+                                <input type="number" id="bulkRollCount" value="10000" class="w-full px-4 py-3 rounded-xl border border-blue-200 font-bold outline-none text-sm shadow-inner">
+                                <button onclick="runBulkSimulation()" class="px-8 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-md">추출</button>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-purple-50/40 rounded-3xl border border-purple-100">
+                            <h3 class="font-bold text-purple-900 mb-4">획득 체감 리포트</h3>
+                            <div class="space-y-3">
+                                <select id="targetItemIndex" class="w-full px-4 py-3 rounded-xl border border-purple-200 font-bold text-sm bg-white"></select>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" id="pityCount" placeholder="천장 설정" class="w-full px-4 py-3 rounded-xl border border-purple-200 font-bold text-sm">
+                                    <button onclick="runTargetSimulation()" class="w-full py-3 bg-purple-600 text-white rounded-xl font-bold shadow-md">분석</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="gachaPlaceholder" class="bg-white p-24 rounded-[2rem] border border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400">
+                    <p class="font-bold">상단의 엔진을 가동하여 데이터를 확인하세요.</p>
+                </div>
+
+                <div id="gachaContentArea" class="hidden space-y-8">
+                    <section id="resultsSection" class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-xl font-bold text-slate-800">추출 통계 결과</h2>
+                            <button onclick="exportBulkCSV()" class="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-xs font-bold border border-emerald-100">CSV 저장</button>
+                        </div>
+                        <div class="overflow-x-auto rounded-2xl border border-slate-100">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-400 font-bold"><th class="px-6 py-4">아이템명</th><th class="px-6 py-4">실제 획득</th><th class="px-6 py-4">실제 확률</th><th class="px-6 py-4">설계 확률</th></tr>
+                                </thead>
+                                <tbody id="resultBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section id="distributionSection" class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                        <h2 class="text-xl font-bold mb-8 text-slate-800">획득 시도 분포</h2>
+                        <div id="statsSummary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10"></div>
+                        <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 mb-10"><canvas id="distChart" style="height: 300px;"></canvas></div>
+                        <div id="percentileBars" class="space-y-6"></div>
+                    </section>
+                </div>
+            </main>
+        </div>
+
+        <!-- [ENHANCE TAB] -->
+        <div id="tabEnhance" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in">
+            <aside class="lg:col-span-5 space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60 sticky top-8">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-xl font-bold text-slate-800">강화 조건 설정</h2>
+                        <div class="flex gap-2">
+                             <button onclick="toggleEnhanceBulk()" class="text-xs font-bold text-slate-400 hover:text-indigo-600 transition-all">엑셀 편집</button>
+                             <button onclick="resetEnhanceLevels()" class="text-xs font-bold text-red-400 hover:text-red-600 transition-all">초기화</button>
+                        </div>
+                    </div>
+                    <div id="enhanceLevelContainer" class="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar"></div>
+                    <button onclick="addEnhanceLevel()" class="w-full mt-8 py-5 bg-slate-50 border-2 border-dashed border-slate-200 rounded-[1.5rem] text-slate-400 font-bold hover:bg-white transition-all">+ 단계 추가</button>
+                </div>
+            </aside>
+
+            <main class="lg:col-span-7 space-y-8">
+                <section class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-6 bg-indigo-50/40 rounded-3xl border border-indigo-100">
+                            <h3 class="font-bold text-indigo-900 mb-4">도달 시뮬레이션</h3>
+                            <div class="space-y-4">
+                                <div class="bg-white/50 p-3 rounded-2xl border border-indigo-100 flex justify-between items-center">
+                                    <span class="text-xs font-bold text-slate-500">목표 단계</span>
+                                    <select id="targetEnhanceLv" class="bg-transparent font-black text-indigo-600 outline-none"></select>
+                                </div>
+                                <button onclick="runEnhanceSimulation()" class="w-full py-3.5 bg-indigo-600 text-white rounded-xl font-bold shadow-md">수치 산출</button>
+                            </div>
+                        </div>
+                        <div class="p-6 bg-orange-50/40 rounded-3xl border border-orange-100 flex flex-col justify-between">
+                            <h3 class="font-bold text-orange-900 mb-4">시나리오 추적</h3>
+                            <button onclick="trackOneUserEnhance()" class="w-full py-3.5 bg-orange-500 text-white rounded-xl font-bold shadow-md">그래프 생성</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="enhancePlaceholder" class="bg-white p-24 rounded-[2rem] border border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 font-bold">
+                    ⚙️ 강화 수치를 설정하고 엔진을 가동하세요.
+                </div>
+
+                <div id="enhanceContentArea" class="hidden space-y-8 animate-fade-in">
+                    <section id="enhanceStatsWrapper" class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                        <div id="enhanceStatsSummary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 text-center"></div>
+                        <div class="bg-slate-50 p-8 rounded-3xl border border-slate-100 mb-10"><canvas id="enhanceDistChart" style="height: 250px;"></canvas></div>
+                        <div id="enhancePercentileBars" class="space-y-6"></div>
+                    </section>
+                    <section id="oneUserJourneySection" class="hidden bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+                        <h2 class="text-xl font-bold mb-8 text-orange-800">강화 여정 트래킹</h2>
+                        <div class="bg-slate-50 p-6 rounded-3xl border border-slate-100"><canvas id="journeyChart" style="height: 380px;"></canvas></div>
+                    </section>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="hidden fixed inset-0 z-[200] flex items-center justify-center p-4">
+        <div class="modal-overlay absolute inset-0" onclick="toggleHelp(false)"></div>
+        <div class="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden animate-in zoom-in duration-300">
+            <div class="p-8 border-b border-slate-100 flex justify-between items-center">
+                <h2 class="text-2xl font-black text-slate-800">사용 가이드</h2>
+                <button onclick="toggleHelp(false)" class="text-slate-400 hover:text-slate-900 transition-colors">✕</button>
+            </div>
+            <div class="p-10 space-y-8 text-slate-600 leading-relaxed">
+                <section>
+                    <h3 class="text-lg font-bold text-blue-600 mb-2">어떤 도구인가요?</h3>
+                    <p class="font-medium">확률은 숫자일 뿐이지만 실제 유저의 경험은 매우 다를 수 있습니다. 이 시뮬레이터는 가상의 유저 1,000명 이상을 대신 투입하여 확률의 '공정함'과 '매운맛'을 미리 경험해보는 연구실입니다.</p>
+                </section>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-6 bg-blue-50/50 rounded-3xl border border-blue-100">
+                        <h4 class="font-bold text-blue-800 mb-2">가챠 연구</h4>
+                        <p class="text-xs">가중치와 백분율을 조절하며 운이 가장 없는 유저가 겪을 절망의 수준(Pity)을 설계하세요.</p>
+                    </div>
+                    <div class="p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100">
+                        <h4 class="font-bold text-indigo-800 mb-2">강화 연구</h4>
+                        <p class="text-xs">실패 시의 리스크(하락/파괴)가 유저의 성장 곡선에 어떤 영향을 주는지 확인하세요.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-8 bg-slate-50 border-t border-slate-100">
+                <button onclick="toggleHelp(false)" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all">연구실 입장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 bg-slate-900 text-white rounded-2xl shadow-2xl transition-all duration-300 opacity-0 pointer-events-none text-sm font-bold z-[300] flex items-center gap-3">
+        <div class="w-6 h-6 bg-blue-600 rounded-lg flex items-center justify-center text-xs">🧪</div>
+        <span id="toastMsg">메시지</span>
+    </div>
+
+    <script>
+        // --- Core State ---
+        let items = [
+            { name: "SSS 전설 보물", value: 1, color: "#f59e0b" },
+            { name: "SS 영웅 장비", value: 5, color: "#8b5cf6" },
+            { name: "S 희귀 소모품", value: 15, color: "#3b82f6" },
+            { name: "A 고급 재료", value: 30, color: "#10b981" },
+            { name: "B 일반 잡동사니", value: 49, color: "#94a3b8" }
+        ];
+        let enhanceLevels = [];
+        let mode = 'weight';
+        let pieChart, distChart, enhanceDistChart, journeyChart;
+        let openPickerIdx = -1;
+
+        // --- UI ---
+        function switchTab(tab) {
+            const tG = document.getElementById('tabGacha');
+            const tE = document.getElementById('tabEnhance');
+            if (tG) tG.classList.toggle('hidden', tab !== 'gacha');
+            if (tE) tE.classList.toggle('hidden', tab !== 'enhance');
+            const gB = document.getElementById('tabBtnGacha');
+            const eB = document.getElementById('tabBtnEnhance');
+            if(tab === 'gacha') {
+                gB.className = "flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 tab-active text-sm shadow-lg";
+                eB.className = "flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 text-slate-500 hover:text-slate-900 text-sm font-bold";
+                renderItems();
+            } else {
+                eB.className = "flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 tab-active text-sm shadow-lg";
+                gB.className = "flex-1 lg:flex-none py-2.5 px-8 rounded-xl transition-all duration-300 text-slate-500 hover:text-slate-900 text-sm font-bold";
+                renderEnhanceLevels();
+            }
+        }
+
+        function toggleHelp(show) { document.getElementById('helpModal').classList.toggle('hidden', !show); }
+
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = m;
+            t.classList.replace('opacity-0', 'opacity-100');
+            t.classList.replace('bottom-10', 'bottom-14');
+            setTimeout(() => {
+                t.classList.replace('opacity-100', 'opacity-0');
+                t.classList.replace('bottom-14', 'bottom-10');
+            }, 3000);
+        }
+
+        // --- Gacha ---
+        function renderItems() {
+            const container = document.getElementById('itemContainer');
+            const targetSelect = document.getElementById('targetItemIndex');
+            if(!container || !targetSelect) return;
+            container.innerHTML = '';
+            targetSelect.innerHTML = '';
+            let total = items.reduce((sum, item) => sum + parseFloat(item.value || 0), 0);
+            items.forEach((item, index) => {
+                const isPickerOpen = openPickerIdx === index;
+                const realProb = mode === 'percent' ? item.value : (item.value / total * 100);
+                const div = document.createElement('div');
+                div.className = `group flex items-center gap-4 p-5 rounded-3xl border transition-all ${isPickerOpen ? 'border-blue-300 bg-white shadow-lg ring-4 ring-blue-50' : 'border-slate-100 bg-slate-50 hover:bg-white'}`;
+                div.innerHTML = `
+                    <div class="relative shrink-0">
+                        <div onclick="event.stopPropagation(); openPickerIdx=${isPickerOpen ? -1 : index}; renderItems();" class="w-5 h-10 rounded-full cursor-pointer border border-black/10 shadow-inner" style="background-color:${item.color}"></div>
+                        ${isPickerOpen ? `<div class="absolute left-8 top-0 bg-white border border-slate-200 shadow-2xl rounded-3xl p-4 w-52 z-[100]" onclick="event.stopPropagation()">
+                            <p class="text-[10px] font-black text-slate-400 uppercase mb-3 tracking-widest text-center">색상 지정</p>
+                            <input type="color" value="${item.color}" onchange="updateItem(${index},'color',this.value)" class="w-full h-10 rounded-xl cursor-pointer border-none p-0 bg-transparent mb-3">
+                            <div class="flex flex-wrap gap-2 justify-center">
+                                ${['#94a3b8', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'].map(c => `<div onclick="updateItem(${index},'color','${c}'); openPickerIdx=-1; renderItems();" class="w-6 h-6 rounded-full cursor-pointer hover:scale-125 transition-transform border border-black/5" style="background-color:${c}"></div>`).join('')}
+                            </div>
+                        </div>` : ''}
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <input type="text" value="${item.name}" onchange="updateItem(${index},'name',this.value)" class="w-full bg-transparent font-bold text-sm border-none outline-none focus:text-blue-600 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <input type="number" step="0.01" value="${item.value}" onchange="updateItem(${index},'value',this.value)" class="w-16 px-1.5 py-0.5 bg-white border border-slate-100 rounded-lg text-[10px] font-black outline-none focus:border-blue-300">
+                            <span class="text-[11px] text-blue-600 font-bold">${realProb.toFixed(3)}%</span>
+                        </div>
+                    </div>
+                    <button onclick="removeItem(${index})" class="opacity-0 group-hover:opacity-100 p-2 text-slate-300 hover:text-red-500 transition-all">✕</button>`;
+                container.appendChild(div);
+                const opt = document.createElement('option'); opt.value = index; opt.textContent = item.name; targetSelect.appendChild(opt);
+            });
+            drawPieChart(total);
+        }
+
+        function setMode(m) { mode = m; renderItems(); }
+        function updateItem(idx, k, v) { items[idx][k] = k === 'value' ? parseFloat(v) : v; renderItems(); }
+        function addItem() { items.push({ name: "신규 항목", value: mode === 'percent' ? 0 : 10, color: '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0') }); renderItems(); }
+        function removeItem(idx) { if(items.length > 1) { items.splice(idx,1); renderItems(); } }
+        function toggleBulkInput() { const el = document.getElementById('bulkInputWrapper'); if (el) el.classList.toggle('hidden'); }
+        function applyBulkInput(overwrite) { 
+            const area = document.getElementById('bulkInputArea');
+            if (!area) return;
+            const lines = area.value.trim().split('\n');
+            let n = []; lines.forEach(l => { const p = l.split(/\t|,/); if(p.length >= 2) n.push({name:p[0].trim(), value:parseFloat(p[1]), color:'#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}); });
+            if(n.length){ items = overwrite ? n : items.concat(n); renderItems(); toggleBulkInput(); showToast("데이터가 반영되었습니다."); }
+        }
+
+        function getCDF() { 
+            let total = items.reduce((s,i) => s + parseFloat(i.value||0), 0);
+            let c = 0; return items.map(i => {
+                let p = mode === 'percent' ? (i.value/100) : (i.value/total);
+                c += p; return {...i, cdf: c, prob: p};
+            }); 
+        }
+        function roll(cdf) { const r = Math.random(); for(let i=0; i<cdf.length; i++) if(r <= cdf[i].cdf) return i; return cdf.length-1; }
+
+        function runBulkSimulation() {
+            const count = parseInt(document.getElementById('bulkRollCount').value);
+            const cdf = getCDF(); const res = new Array(items.length).fill(0);
+            for(let i=0; i<count; i++) res[roll(cdf)]++;
+            document.getElementById('gachaPlaceholder').classList.add('hidden');
+            document.getElementById('gachaContentArea').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.remove('hidden');
+            document.getElementById('distributionSection').classList.add('hidden');
+            const body = document.getElementById('resultBody'); 
+            if(body) {
+                body.innerHTML = '';
+                res.forEach((c, i) => {
+                    const actual = (c/count)*100, target = cdf[i].prob*100;
+                    body.innerHTML += `<tr class="hover:bg-slate-50"><td class="px-6 py-5 flex items-center gap-3 font-bold text-slate-800"><div class="w-3 h-3 rounded-full" style="background-color:${items[i].color}"></div>${items[i].name}</td><td class="px-6 py-5 font-mono text-slate-500">${c.toLocaleString()}회</td><td class="px-6 py-5 font-black text-blue-600">${actual.toFixed(3)}%</td><td class="px-6 py-5 text-slate-400">${target.toFixed(3)}%</td></tr>`;
+                });
+            }
+            showToast(`${count.toLocaleString()}회 정밀 검토 완료`);
+        }
+
+        function runTargetSimulation() {
+            const tEl = document.getElementById('targetItemIndex');
+            const pEl = document.getElementById('pityCount');
+            const cEl = document.getElementById('costPerRollInput');
+            if(!tEl || !pEl || !cEl) return;
+            const idx = parseInt(tEl.value);
+            const pCount = parseInt(pEl.value) || 0;
+            const cost = parseInt(cEl.value);
+            const cdf = getCDF();
+            if(cdf[idx].prob <= 0 && pCount <= 0) return showToast("확률 설정을 확인하세요.");
+            let rCounts = [];
+            for(let u=0; u<1000; u++) {
+                let a = 0; while(a < 100000) { a++; if((pCount > 0 && a >= pCount) || roll(cdf) === idx) break; }
+                rCounts.push(a);
+            }
+            rCounts.sort((a,b) => a-b);
+            document.getElementById('gachaPlaceholder').classList.add('hidden');
+            document.getElementById('gachaContentArea').classList.remove('hidden');
+            document.getElementById('distributionSection').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+            const summary = document.getElementById('statsSummary');
+            if(summary) {
+                const avg = rCounts.reduce((a,b)=>a+b,0)/rCounts.length;
+                summary.innerHTML = `
+                    <div class="bg-white p-6 rounded-3xl border shadow-sm"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">평균 시도</p><p class="text-2xl font-black text-slate-800">${Math.round(avg).toLocaleString()}회</p></div>
+                    <div class="bg-white p-6 rounded-3xl border shadow-sm"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">평균 비용</p><p class="text-2xl font-black text-blue-600">💎${Math.round(avg*cost).toLocaleString()}</p></div>
+                    <div class="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100"><p class="text-[10px] text-emerald-500 font-bold uppercase mb-1">상위 1% 운</p><p class="text-2xl font-black text-emerald-700">${rCounts[0].toLocaleString()}회</p></div>
+                    <div class="bg-red-50/50 p-6 rounded-3xl border border-red-100"><p class="text-[10px] text-red-500 font-bold uppercase mb-1">하위 1% 불운</p><p class="text-2xl font-black text-red-700">${rCounts[rCounts.length-1].toLocaleString()}회</p></div>`;
+            }
+            const bars = document.getElementById('percentileBars'); 
+            if(bars) {
+                bars.innerHTML = '<h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-6">분위수별 획득 분석</h3>';
+                [{l:"운 좋음 (상위 10%)",p:0.1,c:"bg-emerald-500"},{l:"평균적 (50%)",p:0.5,c:"bg-slate-400"},{l:"운 없음 (하위 1%)",p:0.99,c:"bg-red-600"}].forEach(pt => {
+                    const val = rCounts[Math.floor(rCounts.length * pt.p)];
+                    const w = (val / rCounts[rCounts.length-1]) * 100;
+                    bars.innerHTML += `<div><div class="flex justify-between text-[11px] font-bold mb-2"><span>${pt.l}</span><span>${val.toLocaleString()}회 (${(val*cost).toLocaleString()} 💎)</span></div><div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden"><div class="${pt.c} h-full rounded-full transition-all duration-1000" style="width:${w}%"></div></div></div>`;
+                });
+            }
+            drawGachaDistChart(rCounts);
+            showToast("경험 분석 데이터 생성 완료");
+        }
+
+        // --- Charts ---
+        function drawPieChart(total) {
+            const canvas = document.getElementById('pieChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(!ctx) return;
+            if(pieChart) pieChart.destroy();
+            pieChart = new Chart(ctx, { type:'doughnut', data:{labels:items.map(i=>i.name), datasets:[{data:items.map(i=>mode==='percent'?i.value:(i.value/total*100)), backgroundColor:items.map(i=>i.color), borderWidth:4, borderColor:'#fff', hoverOffset: 12}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},cutout:'80%'} });
+        }
+
+        function drawGachaDistChart(counts) {
+            const canvas = document.getElementById('distChart');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            if(!ctx) return;
+            if(distChart) distChart.destroy();
+            const bins = 30; const min = counts[0], max = counts[counts.length-1], step = Math.ceil((max-min)/bins);
+            let bData = Array(bins).fill(0), labels = Array(bins).fill(0);
+            counts.forEach(c => { const i = Math.min(bins-1, Math.floor((c-min)/step)); bData[i]++; });
+            for(let i=0; i<bins; i++) labels[i] = min+(i*step) + '회';
+            distChart = new Chart(ctx, { type:'bar', data:{labels, datasets:[{data:bData, backgroundColor:'#a855f7', borderRadius:8, barPercentage: 0.7}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{grid:{display:false}, beginAtZero:true, ticks:{display: false}}, x:{grid:{display:false}, ticks:{font:{size: 9, weight: 'bold', family: 'Noto Sans KR'}}}},plugins:{legend:{display:false}}} });
+        }
+
+        // --- Enhance ---
+        function resetEnhanceLevels() {
+            enhanceLevels = [];
+            for(let i=1; i<=10; i++) {
+                let prob = Math.max(5, 100 - (i-1)*10);
+                let penalty = i <= 3 ? 0 : (i <= 7 ? 1 : 2);
+                enhanceLevels.push({ lv: i, prob, cost: i * 500, penalty });
+            }
+            renderEnhanceLevels();
+        }
+
+        function renderEnhanceLevels() {
+            const container = document.getElementById('enhanceLevelContainer');
+            const targetSelect = document.getElementById('targetEnhanceLv');
+            if(!container || !targetSelect) return;
+            container.innerHTML = '';
+            targetSelect.innerHTML = '';
+            enhanceLevels.forEach((level, i) => {
+                const div = document.createElement('div');
+                div.className = "p-5 bg-slate-50 border border-slate-100 rounded-[1.5rem] flex items-center gap-5 hover:bg-white transition-all";
+                div.innerHTML = `
+                    <div class="w-12 h-12 bg-indigo-100 text-indigo-700 rounded-2xl flex items-center justify-center font-black shrink-0 shadow-sm border border-indigo-200">+${level.lv}</div>
+                    <div class="flex-1 grid grid-cols-3 gap-3">
+                        <div class="space-y-1">
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">확률(%)</span>
+                            <input type="number" step="0.1" value="${level.prob}" onchange="updateLevelProp(${i}, 'prob', this.value)" class="w-full bg-white border border-slate-100 rounded-xl px-2 py-1.5 text-xs font-bold outline-none focus:border-indigo-400">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">비용</span>
+                            <input type="number" value="${level.cost}" onchange="updateLevelProp(${i}, 'cost', this.value)" class="w-full bg-white border border-slate-100 rounded-xl px-2 py-1.5 text-xs font-bold outline-none focus:border-indigo-400">
+                        </div>
+                        <div class="space-y-1">
+                            <span class="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">실패 패널티</span>
+                            <select onchange="updateLevelProp(${i}, 'penalty', this.value)" class="w-full bg-white border border-slate-100 rounded-xl px-2 py-1 text-[9px] font-bold outline-none">
+                                <option value="0" ${level.penalty == 0 ? 'selected' : ''}>유지</option>
+                                <option value="1" ${level.penalty == 1 ? 'selected' : ''}>하락</option>
+                                <option value="2" ${level.penalty == 2 ? 'selected' : ''}>파괴</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button onclick="removeEnhanceLevel(${i})" class="text-slate-300 hover:text-red-500 transition-all">✕</button>`;
+                container.appendChild(div);
+                const opt = document.createElement('option'); opt.value = level.lv; opt.textContent = `+${level.lv} 단계 도달`;
+                targetSelect.appendChild(opt);
+            });
+        }
+
+        function addEnhanceLevel() {
+            const nL = enhanceLevels.length > 0 ? enhanceLevels[enhanceLevels.length-1].lv + 1 : 1;
+            enhanceLevels.push({ lv: nL, prob: 50, cost: 5000, penalty: 1 });
+            renderEnhanceLevels();
+        }
+
+        function removeEnhanceLevel(idx) {
+            enhanceLevels.splice(idx, 1);
+            enhanceLevels.forEach((l, i) => l.lv = i + 1);
+            renderEnhanceLevels();
+        }
+
+        function updateLevelProp(idx, k, v) { enhanceLevels[idx][k] = (k === 'penalty' ? parseInt(v) : parseFloat(v)); }
+        function toggleEnhanceBulk() { const el = document.getElementById('enhanceBulkWrapper'); if (el) el.classList.toggle('hidden'); }
+        function applyEnhanceBulk() {
+            const area = document.getElementById('enhanceBulkArea');
+            if (!area) return;
+            const lines = area.value.trim().split('\n');
+            let n = [];
+            lines.forEach((l, idx) => {
+                const p = l.split(/\t|,/);
+                if(p.length >= 2) n.push({ lv: idx + 1, prob: parseFloat(p[1]), cost: parseFloat(p[2] || 0), penalty: parseInt(p[3] || 0) });
+            });
+            if(n.length) { enhanceLevels = n; renderEnhanceLevels(); toggleEnhanceBulk(); showToast("강화 수치 반영 완료"); }
+        }
+
+        function runEnhanceSimulation() {
+            const tEl = document.getElementById('targetEnhanceLv');
+            if (!tEl) return;
+            const targetLv = parseInt(tEl.value);
+            const results = [];
+            for(let u=0; u<1000; u++) {
+                let cur = 0, att = 0, cost = 0, des = 0;
+                while(cur < targetLv && att < 100000) {
+                    att++;
+                    const cfg = enhanceLevels[cur];
+                    if(!cfg) break;
+                    cost += cfg.cost;
+                    if(Math.random() * 100 <= cfg.prob) cur++;
+                    else { if(cfg.penalty === 1 && cur > 0) cur--; else if(cfg.penalty === 2) { cur = 0; des++; } }
+                }
+                results.push({ att, cost, des });
+            }
+            displayEnhanceStats(results);
+        }
+
+        function displayEnhanceStats(res) {
+            const atts = res.map(r => r.att).sort((a,b)=>a-b);
+            const avgAtt = atts.reduce((a,b)=>a+b,0)/atts.length;
+            const avgCost = res.reduce((s,r)=>s+r.cost,0)/res.length;
+            const avgDes = res.reduce((s,r)=>s+r.des,0)/res.length;
+            document.getElementById('enhancePlaceholder').classList.add('hidden');
+            document.getElementById('enhanceContentArea').classList.remove('hidden');
+            document.getElementById('enhanceStatsWrapper').classList.remove('hidden');
+            document.getElementById('oneUserJourneySection').classList.add('hidden');
+            const summary = document.getElementById('enhanceStatsSummary');
+            if(summary) {
+                summary.innerHTML = `<div class="bg-indigo-600 p-6 rounded-3xl text-white shadow-lg"><p class="text-[10px] opacity-70 font-bold uppercase mb-1">평균 시도</p><p class="text-2xl font-black">${Math.round(avgAtt).toLocaleString()}회</p></div>
+                <div class="bg-white p-6 rounded-3xl border shadow-sm"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">평균 비용</p><p class="text-2xl font-black text-slate-800">💰${Math.round(avgCost).toLocaleString()}</p></div>
+                <div class="bg-red-50 p-6 rounded-3xl border border-red-100 text-red-600"><p class="text-[10px] opacity-70 font-bold uppercase mb-1">평균 파괴</p><p class="text-2xl font-black">${avgDes.toFixed(2)}회</p></div>
+                <div class="bg-white p-6 rounded-3xl border shadow-sm"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">상위 1% 운</p><p class="text-2xl font-black text-emerald-600">${atts[0].toLocaleString()}회</p></div>`;
+            }
+            const bars = document.getElementById('enhancePercentileBars'); 
+            if(bars) {
+                bars.innerHTML = '<h3 class="text-[10px] font-black text-slate-300 uppercase mb-6 tracking-widest text-center">분위수별 도달 난이도</h3>';
+                [{l:"행운아 (상위 10%)",p:0.1,c:"bg-indigo-400"},{l:"보통 (중앙값)",p:0.5,c:"bg-slate-300"},{l:"불운아 (하위 1%)",p:0.99,c:"bg-red-500"}].forEach(pt => {
+                    const val = atts[Math.floor(atts.length * pt.p)];
+                    const w = (val / atts[atts.length-1]) * 100;
+                    bars.innerHTML += `<div><div class="flex justify-between text-[11px] font-bold mb-2"><span>${pt.l}</span><span>${val.toLocaleString()}회 소요</span></div><div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden"><div class="${pt.c} h-full rounded-full transition-all duration-1000" style="width:${w}%"></div></div></div>`;
+                });
+            }
+            const canvas = document.getElementById('enhanceDistChart');
+            if(canvas) {
+                const ctx = canvas.getContext('2d');
+                if(ctx) {
+                    if(enhanceDistChart) enhanceDistChart.destroy();
+                    const bins = 30; const min = atts[0], max = atts[atts.length-1], step = Math.ceil((max-min)/bins);
+                    let bData = Array(bins).fill(0), labels = Array(bins).fill(0);
+                    atts.forEach(c => { const i = Math.min(bins-1, Math.floor((c-min)/step)); bData[i]++; });
+                    for(let i=0; i<bins; i++) labels[i] = min+(i*step) + '회';
+                    enhanceDistChart = new Chart(ctx, { type:'line', data:{labels, datasets:[{data:bData, borderColor:'#6366f1', borderWidth:4, fill:true, tension:0.4, pointRadius:0, backgroundColor:'rgba(99, 102, 241, 0.05)'}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{display:false}, x:{grid:{display:false}, ticks:{font:{size: 9, weight: 'bold', family: 'Noto Sans KR'}}}},plugins:{legend:{display:false}}} });
+                }
+            }
+            showToast("강화 검증 완료");
+        }
+
+        function trackOneUserEnhance() {
+            const tEl = document.getElementById('targetEnhanceLv');
+            if(!tEl) return;
+            const targetLv = parseInt(tEl.value);
+            if(targetLv > enhanceLevels.length) return showToast("단계를 먼저 생성하세요.");
+            document.getElementById('enhancePlaceholder').classList.add('hidden');
+            document.getElementById('enhanceContentArea').classList.remove('hidden');
+            document.getElementById('enhanceStatsWrapper').classList.add('hidden');
+            document.getElementById('oneUserJourneySection').classList.remove('hidden');
+            let cur = 0, history = [0], att = 0;
+            while(cur < targetLv && att < 10000) {
+                att++;
+                const cfg = enhanceLevels[cur];
+                if(!cfg) break;
+                if(Math.random() * 100 <= cfg.prob) cur++;
+                else { if(cfg.penalty === 1 && cur > 0) cur--; else if(cfg.penalty === 2) cur = 0; }
+                history.push(cur);
+            }
+            const canvas = document.getElementById('journeyChart');
+            if(canvas) {
+                const ctx = canvas.getContext('2d');
+                if(journeyChart) journeyChart.destroy();
+                journeyChart = new Chart(ctx, { type:'line', data:{labels: history.map((_,i)=>i+'회'), datasets:[{label:'강화 단계', data:history, borderColor:'#f97316', backgroundColor:'rgba(249, 115, 22, 0.05)', fill:true, borderWidth:3, pointRadius:0, tension:0.1}]}, options:{responsive:true, maintainAspectRatio:false, scales:{y:{min:0, max:targetLv, ticks:{stepSize:1, font:{weight:'bold'}}, grid:{color: '#e2e8f0'}}, x:{ticks:{maxTicksLimit:15, font:{size:9, weight:'bold', family: 'Noto Sans KR'}}, grid:{display:false}}}} });
+                showToast("1인 시나리오 생성 완료");
+            }
+        }
+
+        function exportBulkCSV() {
+            let csv = "data:text/csv;charset=utf-8,\uFEFF아이템명,실제획득량,실제확률,설계확률\n";
+            document.querySelectorAll('#resultBody tr').forEach(tr => {
+                const tds = tr.querySelectorAll('td');
+                if (tds.length >= 4) csv += `${tds[0].innerText},${tds[1].innerText},${tds[2].innerText},${tds[3].innerText}\n`;
+            });
+            const link = document.createElement("a"); link.href = encodeURI(csv); link.download = "probability_report.csv"; link.click();
+        }
+
+        window.onload = () => { switchTab('gacha'); resetEnhanceLevels(); };
+        window.onclick = () => { if(openPickerIdx !== -1) { openPickerIdx = -1; renderItems(); } };
+    </script>
+</body>
+</html>
